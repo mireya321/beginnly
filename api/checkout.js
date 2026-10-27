@@ -51,6 +51,7 @@ export default async function handler(req, res) {
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
+      managed_payments: { enabled: false },
       customer_email: user.email,
       client_reference_id: job.id,
       line_items: [
