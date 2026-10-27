@@ -4,17 +4,25 @@ import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { getPlan } from '../src/lib/plans.js'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
-const supabase = createClient(
-  process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY,
-  { auth: { persistSession: false } }
-)
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   try {
+    // Tell the owner exactly which setting is missing (names only, never values)
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
+    const missing = [
+      !process.env.STRIPE_SECRET_KEY && 'STRIPE_SECRET_KEY',
+      !process.env.SUPABASE_SERVICE_KEY && 'SUPABASE_SERVICE_KEY',
+      !supabaseUrl && 'VITE_SUPABASE_URL',
+    ].filter(Boolean)
+    if (missing.length)
+      return res.status(500).json({ error: `Missing setting in Vercel: ${missing.join(', ')}` })
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+    const supabase = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_KEY, {
+      auth: { persistSession: false },
+    })
+
     const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '')
     if (!token) return res.status(401).json({ error: 'Please log in again' })
 
@@ -43,6 +51,7 @@ export default async function handler(req, res) {
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
+      managed_payments: { enabled: false },
       customer_email: user.email,
       client_reference_id: job.id,
       line_items: [
@@ -67,6 +76,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ url: session.url })
   } catch (e) {
     console.error('checkout error', e)
-    return res.status(500).json({ error: 'Could not start checkout' })
+    return res.status(500).json({ error: `Checkout failed: ${e.message}` })
   }
 }
