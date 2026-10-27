@@ -16,6 +16,7 @@ import Employer from './pages/Employer'
 import PostJob from './pages/PostJob'
 import RequireEmployer from './components/RequireEmployer'
 import { AuthProvider } from './lib/auth'
+import { Analytics } from '@vercel/analytics/react'
 
 // Jump back to the top of the page whenever the address changes
 function ScrollToTop() {
@@ -30,6 +31,7 @@ function AppRoutes() {
   return (
     <>
       <ScrollToTop />
+      <Analytics />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/jobs" element={<Jobs />} />
