@@ -1,158 +1,86 @@
 import { Link } from 'react-router-dom'
-import { Bookmark, DollarSign } from 'lucide-react'
-import { formatPay, categoryLabel } from '../lib/format'
-import { useSavedJobs } from '../lib/saved'
-import LevelBadge from './LevelBadge'
+import { Banknote, BadgeCheck, GraduationCap, MapPin } from 'lucide-react'
+import { formatPay, categoryLabel, levelLabel } from '../lib/format'
+import { ago, daysOld, experienceNote } from '../lib/ui'
+import Arrow from './Arrow'
 
-function ago(v) {
-  if (!v) return ''
-  const days = Math.floor((Date.now() - new Date(v).getTime()) / 86400000)
-  if (days <= 0) return 'Today'
-  if (days === 1) return '1 day ago'
-  if (days < 30) return `${days} days ago`
-  return new Date(v).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
-
-function Logo({ job }) {
-  const initial = (job.company || '?').trim().charAt(0).toUpperCase()
-  return (
-    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-dark text-xl font-bold text-white shadow-sm">
-      {initial}
-    </div>
-  )
-}
-
-function Pay({ pay }) {
-  return pay ? (
-    <div className="flex w-fit items-center gap-1 rounded-lg bg-emerald-50 px-3 py-1 text-sm font-bold text-emerald-700">
-      <DollarSign size={16} className="text-emerald-600" />
-      <span>{pay.replace(/^\$/, '')}</span>
-    </div>
-  ) : (
-    <div className="w-fit rounded-lg bg-soft px-3 py-1 text-sm font-medium text-muted">
-      Pay not listed
-    </div>
-  )
-}
-
-function Save({ id, saved, toggle }) {
-  const on = saved.includes(id)
-  return (
-    <button
-      onClick={() => toggle(id)}
-      aria-label={on ? 'Remove from saved' : 'Save job'}
-      title={on ? 'Saved' : 'Save job'}
-      className={`rounded-lg border p-2 ${
-        on
-          ? 'border-brand bg-wash text-dark'
-          : 'border-line text-muted hover:text-dark'
-      }`}
-    >
-      <Bookmark size={16} className={on ? 'fill-dark' : ''} />
-    </button>
-  )
-}
-
-const btnGhost =
-  'whitespace-nowrap rounded-lg bg-soft px-4 py-2 text-sm font-bold text-dark transition-colors hover:bg-line'
-const btnDark =
-  'whitespace-nowrap rounded-lg bg-dark px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-dark-2'
-
-function Actions({ job }) {
-  return (
-    <div className="flex shrink-0 items-center gap-2">
-      <Link to={`/jobs/${job.id}`} className={btnGhost}>
-        View Role
-      </Link>
-      {job.url && (
-        <a href={job.url} target="_blank" rel="noopener noreferrer" className={btnDark}>
-          Apply
-        </a>
-      )}
-    </div>
-  )
-}
-
-// layout: 'grid' (card) or 'list' (row)
-export default function JobRow({ job, layout = 'list' }) {
-  const { saved, toggle } = useSavedJobs()
+// A text-only job card (no image). The whole card opens the job page.
+export default function JobRow({ job }) {
   const pay = formatPay(job)
-  const posted = ago(job.date_posted)
+  const age = daysOld(job.date_posted)
+  const isNew = (age ?? 99) <= 3
+  const remote = /remote/i.test(job.location || '')
+  const note = experienceNote(job, levelLabel)
 
-  if (layout === 'grid') {
-    return (
-      <div className="group flex flex-col justify-between rounded-2xl border border-line bg-white p-6 shadow-sm transition-all hover:border-brand hover:shadow-md">
-        <div>
-          <div className="flex items-start justify-between gap-3">
-            <Logo job={job} />
-            <div className="flex flex-wrap items-center justify-end gap-2">
-              <Save id={job.id} saved={saved} toggle={toggle} />
-              <LevelBadge job={job} />
-            </div>
-          </div>
-
-          <Link to={`/jobs/${job.id}`}>
-            <h3 className="mt-4 text-base font-bold leading-snug text-dark transition-colors group-hover:text-brand">
-              {job.title}
-            </h3>
-          </Link>
-          <p className="mt-1 text-sm text-muted">
-            {job.company}
-            {job.location ? ` • ${job.location}` : ''}
-          </p>
-
-          <div className="mt-4">
-            <Pay pay={pay} />
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            <span className="rounded bg-soft px-3 py-1 text-xs font-medium text-muted">
-              {categoryLabel(job.category)}
-            </span>
-          </div>
-        </div>
-
-        <div className="mt-6 flex items-center justify-between gap-2 border-t border-soft pt-4">
-          <span className="font-mono text-xs text-muted">{posted}</span>
-          <Actions job={job} />
-        </div>
-      </div>
-    )
-  }
+  const chip =
+    'inline-flex items-center gap-1.5 rounded-full bg-paper-2 px-3 py-1.5 text-xs font-bold text-ink'
 
   return (
-    <div className="group flex flex-col justify-between gap-4 rounded-2xl border border-line bg-white p-6 shadow-sm transition-all hover:border-brand hover:shadow-md md:flex-row md:items-center">
-      <div className="flex min-w-0 flex-1 items-start gap-4">
-        <Logo job={job} />
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <Link to={`/jobs/${job.id}`} className="min-w-0">
-              <h3 className="truncate text-base font-bold text-dark transition-colors group-hover:text-brand">
-                {job.title}
-              </h3>
-            </Link>
-            <LevelBadge job={job} />
-          </div>
-          <p className="mt-1 text-sm text-muted">
-            {job.company}
-            {job.location ? ` • ${job.location}` : ''}
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            <Pay pay={pay} />
-            <span className="rounded bg-soft px-3 py-1 text-xs font-medium text-muted">
-              {categoryLabel(job.category)}
+    <Link
+      to={`/jobs/${job.id}`}
+      className="group flex flex-col justify-between rounded-3xl border border-line bg-white p-6 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+    >
+      <div>
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <span className="rounded-full bg-primary/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-primary">
+            {categoryLabel(job.category)}
+          </span>
+          {isNew && (
+            <span className="rounded-full bg-highlight px-3 py-1 text-xs font-extrabold text-ink">
+              New
             </span>
-          </div>
+          )}
+        </div>
+
+        <h3 className="mb-4 line-clamp-2 font-display text-2xl font-extrabold leading-tight text-ink transition-colors group-hover:text-primary">
+          {job.title}
+        </h3>
+
+        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold text-slate">
+          {job.location && (
+            <span className="flex items-center gap-1.5">
+              <MapPin size={16} />
+              <span>{job.location}</span>
+            </span>
+          )}
+          {pay && (
+            <span className="flex items-center gap-1.5">
+              <Banknote size={16} />
+              <span>{pay}</span>
+            </span>
+          )}
+          <span className="flex items-center gap-1.5">
+            <GraduationCap size={16} />
+            <span>{note}</span>
+          </span>
+        </div>
+
+        <div className="mb-6 flex flex-wrap gap-2">
+          <span className={chip}>
+            <BadgeCheck size={14} className="text-primary" />
+            Entry level
+          </span>
+          {remote && (
+            <span className={chip}>
+              <BadgeCheck size={14} className="text-primary" />
+              Remote
+            </span>
+          )}
         </div>
       </div>
 
-      <div className="flex shrink-0 items-center justify-between gap-4 border-t border-soft pt-4 md:border-0 md:pt-0">
-        <span className="font-mono text-xs text-muted">{posted}</span>
-        <div className="flex items-center gap-2">
-          <Save id={job.id} saved={saved} toggle={toggle} />
-          <Actions job={job} />
+      <div className="flex items-center justify-between gap-3 border-t border-line pt-5">
+        <div className="min-w-0">
+          <div className="truncate text-base font-extrabold text-ink">{job.company}</div>
+          <div className="text-[11px] font-bold uppercase tracking-wider text-slate">
+            Posted {ago(job.date_posted)}
+          </div>
         </div>
+        <span className="btn btn-dark shrink-0">
+          Apply
+          <Arrow size={15} />
+        </span>
       </div>
-    </div>
+    </Link>
   )
 }

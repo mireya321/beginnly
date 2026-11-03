@@ -1,118 +1,68 @@
 import { Link } from 'react-router-dom'
-import Logo from './Logo'
 import { SITE_NAME } from '../config'
 
 function Col({ title, children }) {
   return (
     <div>
-      <h4 className="text-sm font-semibold text-white">{title}</h4>
-      <ul className="mt-4 space-y-3 text-sm text-wash/70">{children}</ul>
+      <h4 className="text-xs font-bold uppercase tracking-wider text-highlight">{title}</h4>
+      <ul className="mt-4 space-y-2.5 text-sm font-medium text-white/80">{children}</ul>
     </div>
   )
 }
 
-// withCta adds the big closing headline row used on the landing page
-export default function Footer({ withCta = false }) {
+// Dark rounded footer card with the big wordmark
+export default function Footer() {
   const link = 'transition-colors hover:text-white'
   return (
-    <footer
-      className={`relative overflow-hidden border-t border-brand/20 bg-dark text-wash ${
-        withCta ? '' : 'mt-16'
-      }`}
-    >
-      <div className="wrap relative z-10 py-16">
-        {withCta && (
-          <div className="flex flex-col items-start justify-between gap-6 border-b border-brand/20 pb-16 md:flex-row md:items-center">
-            <div className="max-w-xl">
-              <h2 className="t-display text-white">Start with a role that fits</h2>
-              <p className="mt-4 text-base text-wash/70">
-                Honest levels. Listings that expire. Less noise.
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link
-                to="/jobs"
-                className="rounded-xl bg-white px-6 py-4 text-sm font-semibold text-dark transition hover:bg-wash"
-              >
-                Browse jobs
-              </Link>
-              <a
-                href="/#pricing"
-                className="rounded-xl border border-brand/40 bg-brand/10 px-6 py-4 text-sm font-semibold text-white transition hover:bg-brand/20"
-              >
-                Post a job
-              </a>
-            </div>
-          </div>
-        )}
-
-        <div className={`grid gap-8 md:grid-cols-4 ${withCta ? 'pt-16' : ''}`}>
-          <div className="space-y-4">
-            <Link to="/" className="group inline-block" aria-label="Home">
-              <Logo tone="dark" />
-            </Link>
-            <p className="text-sm leading-relaxed text-wash/70">
-              A cleaner job board for people starting out. Honest experience
-              levels, listings that expire, less noise.
+    <footer className="p-3">
+      <div className="relative overflow-hidden rounded-3xl bg-forest text-white">
+        <div className="wrap pt-14">
+          <div className="grid gap-10 border-b border-line-dark pb-14 md:grid-cols-12">
+            <p className="max-w-sm text-base font-medium text-white/90 md:col-span-5">
+              Entry-level jobs that don't ask for experience. Built for your first job.
             </p>
+
+            <div className="grid grid-cols-2 gap-6 md:col-span-7 md:grid-cols-3">
+              <Col title="Menu">
+                <li>
+                  <Link to="/jobs" className={link}>
+                    Open jobs
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/contact" className={link}>
+                    Contact us
+                  </Link>
+                </li>
+              </Col>
+              <Col title="Legal">
+                <li>
+                  <Link to="/privacy" className={link}>
+                    Privacy policy
+                  </Link>
+                </li>
+              </Col>
+            </div>
           </div>
 
-          <Col title="Job seekers">
-            <li>
-              <Link to="/jobs" className={link}>
-                Browse all jobs
-              </Link>
-            </li>
-            <li>
-              <a href="/#how" className={link}>
-                How it works
-              </a>
-            </li>
-            <li>
-              <a href="/#faq" className={link}>
-                FAQ
-              </a>
-            </li>
-          </Col>
-
-          <Col title="Employers">
-            <li>
-              <a href="/#features" className={link}>
-                Why post here
-              </a>
-            </li>
-            <li>
-              <a href="/#pricing" className={link}>
-                Plans
-              </a>
-            </li>
-          </Col>
-
-          <Col title="Sources">
-            <li>
-              <a
-                href="https://www.adzuna.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={link}
-              >
-                Jobs by Adzuna
-              </a>
-            </li>
-          </Col>
+          <div className="flex flex-col items-start justify-between gap-3 py-6 text-[11px] font-medium uppercase tracking-wider text-white/60 sm:flex-row sm:items-center">
+            <span>
+              © {new Date().getFullYear()} {SITE_NAME} · All rights reserved
+            </span>
+            <Link to="/privacy" className={link}>
+              Privacy policy
+            </Link>
+          </div>
         </div>
 
-        <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-brand/10 pt-8 text-xs text-wash/50 sm:flex-row sm:items-center">
-          <span>
-            © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
-          </span>
+        <div
+          aria-hidden="true"
+          className="select-none overflow-hidden whitespace-nowrap text-center font-display font-extrabold leading-[0.8] tracking-tighter text-white"
+          style={{ fontSize: 'clamp(72px, 19.5vw, 280px)', marginBottom: '-0.1em', paddingTop: '0.08em' }}
+        >
+          {SITE_NAME}
         </div>
       </div>
-
-      <div
-        aria-hidden="true"
-        className="dot-grid h-24 opacity-30 [mask-image:linear-gradient(to_top,#000,transparent)]"
-      />
     </footer>
   )
 }

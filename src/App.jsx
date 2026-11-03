@@ -7,41 +7,45 @@ import {
   useInRouterContext,
   useLocation,
 } from 'react-router-dom'
-import Home from './pages/Home'
 import Jobs from './pages/Jobs'
 import JobPage from './pages/JobPage'
-import Login from './pages/Login'
-import Signup from './pages/Signup'
-import Employer from './pages/Employer'
-import PostJob from './pages/PostJob'
-import RequireEmployer from './components/RequireEmployer'
-import { AuthProvider } from './lib/auth'
+import Contact from './pages/Contact'
+import Privacy from './pages/Privacy'
+import Unsubscribe from './pages/Unsubscribe'
 import { Analytics } from '@vercel/analytics/react'
 
-// Jump back to the top of the page whenever the address changes
+// Jump back to the top of the page whenever the address changes.
+// If the address has a #section, scroll to that section instead.
 function ScrollToTop() {
-  const { pathname } = useLocation()
+  const { pathname, hash } = useLocation()
   useEffect(() => {
+    if (hash) {
+      const t = setTimeout(() => {
+        document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth' })
+      }, 60)
+      return () => clearTimeout(t)
+    }
     window.scrollTo(0, 0)
-  }, [pathname])
+  }, [pathname, hash])
   return null
 }
 
+// Launch version: the job board only.
+// The employer and login pages are built but switched off for now.
+// To turn them back on later, we add their routes back here.
 function AppRoutes() {
   return (
     <>
       <ScrollToTop />
       <Analytics />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Navigate to="/jobs" replace />} />
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/jobs/:id" element={<JobPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/employer" element={<RequireEmployer><Employer /></RequireEmployer>} />
-        <Route path="/employer/post" element={<RequireEmployer><PostJob /></RequireEmployer>} />
-        <Route path="/employer/post/:id" element={<RequireEmployer><PostJob /></RequireEmployer>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/unsubscribe" element={<Unsubscribe />} />
+        <Route path="*" element={<Navigate to="/jobs" replace />} />
       </Routes>
     </>
   )
@@ -50,12 +54,10 @@ function AppRoutes() {
 export default function App() {
   // Works whether or not main.jsx already wraps the app in a router
   const insideRouter = useInRouterContext()
-  if (insideRouter) return <AuthProvider><AppRoutes /></AuthProvider>
+  if (insideRouter) return <AppRoutes />
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
+      <AppRoutes />
     </BrowserRouter>
   )
 }

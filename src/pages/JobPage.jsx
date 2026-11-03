@@ -3,27 +3,31 @@ import { Link, useParams } from 'react-router-dom'
 import {
   AlertTriangle,
   ArrowLeft,
-  Info,
-  ShieldCheck,
+  ArrowUpRight,
+  Banknote,
+  CalendarDays,
+  GraduationCap,
+  LayoutGrid,
+  MapPin,
   Share2,
 } from 'lucide-react'
 import Layout from '../components/Layout'
 import JobRow from '../components/JobRow'
-import LevelBadge from '../components/LevelBadge'
+import ToolsBlock from '../components/ToolsBlock'
+import SubscribeSection from '../components/SubscribeSection'
+import Arrow from '../components/Arrow'
 import { fetchJob, fetchSimilar } from '../lib/jobs'
 import { formatPay, levelLabel, categoryLabel } from '../lib/format'
 import { descriptionToHtml } from '../lib/description'
+import { ago, experienceNote, initialOf, leadSentence } from '../lib/ui'
 import { MAX_AGE_DAYS, SITE_NAME } from '../config'
+
+// Same photo style as the featured card on the board (Unsplash, free to use)
+const GLANCE_IMAGE =
+  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80'
 
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
-const longDate = (v) =>
-  new Date(v).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
 
 export default function JobPage() {
   const { id } = useParams()
@@ -87,30 +91,26 @@ export default function JobPage() {
   if (status !== 'ready') {
     return (
       <Layout>
-        <div className="wrap py-24 text-center">
-          {status === 'loading' && <p className="text-muted">Loading…</p>}
+        <div className="wrap py-28 text-center">
+          {status === 'loading' && <p className="text-slate">Loading…</p>}
           {status === 'missing' && (
             <>
-              <h1 className="t-section text-dark">This job isn't available</h1>
-              <p className="mt-4 text-muted">
+              <h1 className="t-h3">This job isn't available</h1>
+              <p className="mt-4 text-slate">
                 It may have been removed or the link may be wrong.
               </p>
             </>
           )}
           {status === 'error' && (
             <>
-              <h1 className="t-section text-dark">Something went wrong</h1>
-              <p className="mt-4 text-muted">
-                We couldn't load this job. Please try again.
-              </p>
+              <h1 className="t-h3">Something went wrong</h1>
+              <p className="mt-4 text-slate">We couldn't load this job. Please try again.</p>
             </>
           )}
           {status !== 'loading' && (
-            <Link
-              to="/jobs"
-              className="mt-8 inline-block whitespace-nowrap rounded-xl bg-dark px-6 py-3 text-xs font-bold text-white"
-            >
-              Back to Job Board
+            <Link to="/jobs" className="btn mt-8">
+              Back to jobs
+              <Arrow />
             </Link>
           )}
         </div>
@@ -119,193 +119,178 @@ export default function JobPage() {
   }
 
   const pay = formatPay(job)
-  const level = job.experience_level ? levelLabel(job.experience_level) : null
-  const verified = job.source === 'employer'
   const posted = job.date_posted ? new Date(job.date_posted) : null
-  const expires = posted
-    ? new Date(posted.getTime() + MAX_AGE_DAYS * 86400000)
-    : null
+  const expires = posted ? new Date(posted.getTime() + MAX_AGE_DAYS * 86400000) : null
   const isOld = expires ? expires < new Date() : false
   const html = descriptionToHtml(job.description)
-  const isAdzuna = (job.source || '').toLowerCase().includes('adzuna')
-  const initial = (job.company || '?').trim().charAt(0).toUpperCase()
+  const note = experienceNote(job, levelLabel)
+  const lead = leadSentence(job)
 
-  const facts = [
-    ['Pay', pay || 'Not listed'],
-    ['Location', job.location || 'Not listed'],
-    ['Category', categoryLabel(job.category)],
-    ['Posted', posted ? longDate(posted) : 'Not listed'],
-    ['Expires', expires ? longDate(expires) : 'Not listed'],
-    ['Source', verified ? 'Posted by the employer' : job.source || 'Public job feed'],
-  ]
+  const glance = [
+    [MapPin, 'Location', job.location],
+    [Banknote, 'Pay', pay],
+    [LayoutGrid, 'Category', categoryLabel(job.category)],
+    [GraduationCap, 'Experience', note],
+    [CalendarDays, 'Posted', posted ? ago(job.date_posted) : null],
+  ].filter((r) => r[2])
+
+  const applyHref = job.url || null
 
   return (
     <Layout>
+      {/* Back link */}
       <div className="wrap pt-8">
         <Link
           to="/jobs"
-          className="mb-6 inline-flex w-fit items-center gap-2 rounded-lg bg-white px-4 py-2 text-xs font-bold text-muted shadow-sm transition-colors hover:text-dark"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-slate transition hover:text-ink"
         >
-          <ArrowLeft size={14} />
-          <span className="whitespace-nowrap">Back to Job Board</span>
+          <ArrowLeft size={16} />
+          All jobs
         </Link>
+      </div>
 
-        {isOld && (
-          <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      {isOld && (
+        <div className="wrap mt-6">
+          <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
             <AlertTriangle size={18} className="mt-0.5 shrink-0" />
             This listing is more than {MAX_AGE_DAYS} days old and may no longer be open.
           </div>
-        )}
+        </div>
+      )}
 
-        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_400px]">
-          {/* Main column */}
-          <div className="rounded-3xl border border-line bg-white p-8 shadow-sm">
-            <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
-              <div className="flex min-w-0 items-start gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-dark text-2xl font-bold text-white shadow-md">
-                  {initial}
-                </div>
-                <div className="min-w-0">
-                  <h1 className="text-xl font-bold leading-snug text-dark md:text-2xl">
-                    {job.title}
-                  </h1>
-                  <p className="mt-1 text-sm text-muted">
-                    {job.company}
-                    {job.location ? ` • ${job.location}` : ''}
-                  </p>
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    {pay && (
-                      <span className="rounded-md bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
-                        {pay}
-                      </span>
-                    )}
-                    <span className="rounded-md bg-wash px-3 py-1 text-xs font-bold text-dark">
-                      {categoryLabel(job.category)}
-                    </span>
-                    <LevelBadge job={job} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex shrink-0 flex-col gap-3 md:items-end">
-                <span className="whitespace-nowrap font-mono text-xs text-muted">
-                  {posted ? `Posted ${longDate(posted)}` : 'Posting date not listed'}
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={share}
-                    title="Share job"
-                    className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-line bg-page px-4 py-2 text-sm font-bold text-dark transition-colors hover:bg-wash"
-                  >
-                    <Share2 size={14} />
-                    {copied ? 'Link copied' : 'Share'}
-                  </button>
-                  {job.url ? (
-                    <a
-                      href={job.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="whitespace-nowrap rounded-xl bg-dark px-5 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-dark-2"
-                    >
-                      Apply Now
-                    </a>
-                  ) : (
-                    <span className="cursor-not-allowed whitespace-nowrap rounded-xl bg-soft px-5 py-2 text-sm font-bold text-muted">
-                      Link unavailable
-                    </span>
-                  )}
-                </div>
-              </div>
+      {/* Main layout */}
+      <div className="wrap py-12">
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-16">
+          {/* Left: title and description */}
+          <div className="lg:col-span-7">
+            <div className="flex items-center gap-3">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-line bg-paper-2 font-display text-xl font-extrabold text-primary">
+                {initialOf(job.company)}
+              </span>
+              <span className="text-base font-bold text-ink">{job.company}</span>
             </div>
 
-            <div className="mt-8 border-t border-line pt-6">
-              <h2 className="mb-4 text-sm font-bold text-dark">Role description</h2>
+            <h1 className="mt-6 font-display text-4xl font-extrabold leading-[1.1] tracking-tight text-ink sm:text-5xl lg:text-6xl">
+              {job.title}
+            </h1>
+            {lead && (
+              <p className="mt-4 text-base font-medium leading-relaxed text-slate sm:text-lg">
+                {lead}
+              </p>
+            )}
+
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              {applyHref ? (
+                <a href={applyHref} target="_blank" rel="noopener noreferrer" className="btn btn-dark">
+                  Apply for this job
+                  <Arrow size={15} />
+                </a>
+              ) : (
+                <span className="rounded-xl bg-paper-2 px-5 py-3 font-semibold text-slate">
+                  Link unavailable
+                </span>
+              )}
+              <button onClick={share} className="btn btn-light">
+                {copied ? 'Link copied' : 'Share'}
+                <span className="btn-arrow">
+                  <Share2 size={14} />
+                </span>
+              </button>
+            </div>
+
+            <div className="mt-10 border-t border-line pt-10">
+              <h2 className="mb-6 font-display text-2xl font-bold text-ink">About the job</h2>
               {html ? (
                 <div className="job-body" dangerouslySetInnerHTML={{ __html: html }} />
               ) : (
-                <p className="text-sm text-muted">
-                  No description was provided. See the full posting using the Apply button.
+                <p className="text-slate">
+                  No description was provided. Use the Apply button to see the full posting.
                 </p>
               )}
             </div>
           </div>
 
-          {/* Side column */}
-          <aside className="space-y-6 lg:sticky lg:top-24">
-            <div className="rounded-3xl border border-line bg-white p-6 shadow-sm">
-              <h3 className="mb-4 text-sm font-bold text-dark">Listing details</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {facts.map(([label, value]) => (
-                  <div
+          {/* Right: sidebar */}
+          <div className="space-y-6 lg:col-span-5 lg:sticky lg:top-28">
+            {/* At a glance */}
+            <div className="space-y-6 rounded-3xl border border-line bg-forest p-6 text-white shadow-md sm:p-8">
+              <div className="relative h-48 w-full overflow-hidden rounded-2xl border border-line-dark bg-forest-light">
+                <img
+                  src={GLANCE_IMAGE}
+                  alt=""
+                  onError={(e) => (e.currentTarget.style.display = 'none')}
+                  className="h-full w-full object-cover opacity-90"
+                />
+              </div>
+
+              <span className="block text-[11px] font-extrabold uppercase tracking-widest text-highlight">
+                At a glance
+              </span>
+
+              <ul className="text-sm">
+                {glance.map(([Icon, label, value], i) => (
+                  <li
                     key={label}
-                    className="min-w-0 rounded-xl border border-brand/30 bg-wash/40 p-4"
+                    className={`flex items-center justify-between gap-4 py-3.5 ${
+                      i < glance.length - 1 ? 'border-b border-line-dark' : ''
+                    } ${i === 0 ? 'pt-0' : ''} ${i === glance.length - 1 ? 'pb-0' : ''}`}
                   >
-                    <span className="block font-mono text-[10px] font-bold uppercase tracking-wider text-muted">
+                    <span className="flex items-center gap-2 font-medium text-white/75">
+                      <Icon size={16} className="text-highlight" />
                       {label}
                     </span>
-                    <span className="mt-1 block break-words text-sm font-bold text-dark">
-                      {value}
-                    </span>
-                  </div>
+                    <span className="text-right font-bold text-white">{value}</span>
+                  </li>
                 ))}
-              </div>
-              <p className="mt-4 text-xs text-muted">
-                Listings on {SITE_NAME} stop showing {MAX_AGE_DAYS} days after their posted date.
+              </ul>
+            </div>
+
+            {/* Apply callout */}
+            <div className="space-y-4 rounded-3xl border border-line bg-highlight p-6 text-ink sm:p-8">
+              <h3 className="font-display text-2xl font-bold leading-snug">Ready to apply?</h3>
+              <p className="text-sm font-medium leading-relaxed text-slate">
+                You'll go to the company's own site to apply.
               </p>
-            </div>
-
-            <div className="rounded-3xl border border-line bg-white p-6 shadow-sm">
-              <h3 className="mb-4 text-sm font-bold text-dark">Experience level</h3>
-              <div className="flex items-start gap-4 rounded-xl border border-brand/30 bg-wash/40 p-4">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-dark text-brand">
-                  {verified ? <ShieldCheck size={20} /> : <Info size={20} />}
-                </span>
-                <div className="min-w-0 space-y-2">
-                  <LevelBadge job={job} />
-                  <p className="text-sm font-bold text-dark">
-                    {verified
-                      ? 'Experience level verified'
-                      : level
-                      ? 'Experience level not verified'
-                      : 'Experience level not listed'}
-                  </p>
-                  <p className="text-sm leading-relaxed text-muted">
-                    {verified
-                      ? 'The employer confirmed this role’s experience level when posting it on Beginnly.'
-                      : level
-                      ? 'This level comes from the job’s source. Beginnly hasn’t checked it against the description, so read the requirements before you apply.'
-                      : 'The source didn’t include an experience level for this job.'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {isAdzuna && (
-              <p className="text-center text-xs text-muted">
+              {applyHref && (
                 <a
-                  href="https://www.adzuna.com"
+                  href={applyHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="underline underline-offset-2"
+                  className="btn btn-dark w-full justify-between"
                 >
-                  Jobs by Adzuna
+                  Apply for this job
+                  <Arrow size={15} />
                 </a>
-              </p>
-            )}
-          </aside>
-        </div>
-
-        {similar.length > 0 && (
-          <section className="mt-12">
-            <h2 className="t-section mb-6 text-dark">Similar roles</h2>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {similar.slice(0, 3).map((j) => (
-                <JobRow key={j.id} job={j} layout="grid" />
-              ))}
+              )}
             </div>
-          </section>
-        )}
+
+            <ToolsBlock job={job} />
+          </div>
+        </div>
       </div>
+
+      <SubscribeSection />
+
+      {similar.length > 0 && (
+        <section className="wrap py-16">
+          <div className="mb-8 flex items-center justify-between gap-4">
+            <h2 className="font-display text-3xl font-extrabold text-ink sm:text-4xl">
+              More entry-level jobs
+            </h2>
+            <Link
+              to="/jobs"
+              className="flex items-center gap-1.5 text-sm font-bold text-primary transition hover:text-primary-hover"
+            >
+              View all jobs <ArrowUpRight size={16} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {similar.slice(0, 3).map((j) => (
+              <JobRow key={j.id} job={j} />
+            ))}
+          </div>
+        </section>
+      )}
     </Layout>
   )
 }
