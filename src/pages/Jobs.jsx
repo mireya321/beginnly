@@ -215,7 +215,16 @@ export default function Jobs() {
         )}
 
         {/* Job cards */}
-        {error && (
+                {/* Note about accuracy */}
+        <p className="mb-6 rounded-2xl bg-paper-2 px-5 py-3 text-sm leading-relaxed text-slate">
+          <span className="font-bold text-ink">Heads up:</span> we're still tightening which jobs
+          show up here, so a few listings that ask for experience may slip through. Spotted one?{' '}
+          <a href="/contact" className="font-semibold text-primary underline underline-offset-2">
+            Let us know
+          </a>
+          .
+        </p>
+      {error && (
           <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
             Could not load jobs: {error}
           </div>
