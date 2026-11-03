@@ -1,86 +1,306 @@
-import { useState } from 'react'
-import { Check } from 'lucide-react'
-import Arrow from './Arrow'
-import { subscribe, TRACK_OPTIONS } from '../lib/subscribe'
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
 
-// The email + category form. Used on the board and on every job page.
-// compact = email only (for the small lime card).
-export default function SubscribeForm({ compact = false, defaultCategory = 'all' }) {
-  const [email, setEmail] = useState('')
-  const [category, setCategory] = useState(defaultCategory)
-  const [busy, setBusy] = useState(false)
-  const [done, setDone] = useState(false)
-  const [error, setError] = useState('')
+@theme {
+  /* Beginnly design system */
+  --color-ink: #0e2019;
+  --color-ink-2: #16302a;
+  --color-slate: #5b6660;
+  --color-fog: #b9bdb4;
+  --color-paper: #ffffff;
+  --color-paper-2: #f2f5f2;
+  --color-primary: #1d5641;
+  --color-primary-hover: #2a6c53;
+  --color-highlight: #c8f169;
+  --color-forest: #0f3d2e;
+  --color-forest-light: #174b39;
+  --color-line: rgba(14, 32, 25, 0.14);
+  --color-line-dark: rgba(244, 241, 234, 0.16);
 
-  async function submit(e) {
-    e.preventDefault()
-    if (busy) return
-    setBusy(true)
-    setError('')
-    const res = await subscribe(email, category)
-    setBusy(false)
-    if (res.ok) setDone(true)
-    else setError(res.message)
+  /* Older names, mapped to the new colors so older components still look right */
+  --color-page: #ffffff;
+  --color-dark: #0e2019;
+  --color-dark-2: #16302a;
+  --color-muted: #5b6660;
+  --color-soft: #f2f5f2;
+  --color-wash: #f2f5f2;
+  --color-lilac: #c8f169;
+  --color-brand: #1d5641;
+
+  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Hanken Grotesk', ui-sans-serif, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: inherit;
+}
+
+section[id] {
+  scroll-margin-top: 96px;
+}
+
+/* Page container (max-w-7xl, same as the layout example) */
+.wrap {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+@media (min-width: 640px) {
+  .wrap {
+    padding-inline: 24px;
   }
-
-  if (done) {
-    return (
-      <div className="flex items-start gap-3 rounded-xl bg-white/70 p-4 text-ink">
-        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-white">
-          <Check size={14} strokeWidth={3} />
-        </span>
-        <div>
-          <p className="font-semibold">You're on the list.</p>
-          <p className="text-sm text-slate">
-            We'll email you once a week with new entry-level jobs.
-          </p>
-        </div>
-      </div>
-    )
+}
+@media (min-width: 1024px) {
+  .wrap {
+    padding-inline: 32px;
   }
+}
 
-  const field =
-    'w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-slate/70 focus:border-primary focus:ring-2 focus:ring-primary/20'
+/* Type scale from the design system */
+.t-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 60px;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+.t-h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 56px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+.t-h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 40px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.t-h4 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 32px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.t-eyebrow {
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+@media (max-width: 1023px) {
+  .t-display { font-size: 48px; }
+  .t-h2 { font-size: 40px; }
+  .t-h3 { font-size: 32px; }
+  .t-h4 { font-size: 26px; }
+}
+@media (max-width: 560px) {
+  .t-display { font-size: 38px; }
+  .t-h2 { font-size: 34px; }
+  .t-h3 { font-size: 28px; }
+  .t-h4 { font-size: 24px; }
+}
 
-  return (
-    <form onSubmit={submit} className="space-y-3">
-      <label className="block">
-        <span className="mb-1 block text-xs font-bold text-ink">Email</span>
-        <input
-          type="email"
-          required
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@email.com"
-          className={field}
-        />
-      </label>
+/* Highlighted word, like the lime block in the headline */
+.mark {
+  background: var(--color-highlight);
+  border-radius: 12px;
+  padding: 0 0.18em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
 
-      {!compact && (
-        <label className="block">
-          <span className="mb-1 block text-xs font-bold text-ink">Job category</span>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className={field}
-          >
-            {TRACK_OPTIONS.map(([v, l]) => (
-              <option key={v} value={v}>
-                {l}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
+/* Buttons: dark/green pill-rectangle with a lime arrow square */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  border-radius: 14px;
+  background: var(--color-primary);
+  padding: 4px 4px 4px 18px;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #fff;
+  transition: background 0.2s, transform 0.2s;
+  cursor: pointer;
+  border: 0;
+}
+.btn:hover {
+  background: var(--color-forest-light);
+}
+.btn:active {
+  transform: scale(0.98);
+}
+.btn .btn-arrow {
+  display: inline-flex;
+  height: 34px;
+  width: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--color-highlight);
+  color: var(--color-ink);
+  transition: transform 0.2s;
+}
+.btn:hover .btn-arrow {
+  transform: scale(1.06);
+}
+.btn-light {
+  background: #fff;
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+}
+.btn-light:hover {
+  background: var(--color-paper-2);
+}
+.btn-light .btn-arrow {
+  background: var(--color-forest);
+  color: var(--color-highlight);
+}
+.btn-dark {
+  background: var(--color-forest);
+}
+.btn-dark:hover {
+  background: var(--color-forest-light);
+}
+.btn-lime {
+  background: var(--color-highlight);
+  color: var(--color-ink);
+}
+.btn-lime:hover {
+  background: #d4f685;
+}
+.btn-lime .btn-arrow {
+  background: var(--color-forest);
+  color: var(--color-highlight);
+}
 
-      {error && <p className="text-sm font-medium text-red-700">{error}</p>}
+.btn-sm {
+  gap: 8px;
+  padding: 5px 5px 5px 14px;
+  font-size: 12px;
+  border-radius: 12px;
+}
+.btn-sm .btn-arrow {
+  height: 26px;
+  width: 26px;
+  border-radius: 8px;
+}
 
-      <button type="submit" disabled={busy} className="btn btn-dark disabled:opacity-60">
-        {busy ? 'Saving…' : 'Send me jobs'}
-        <Arrow size={15} />
-      </button>
-      {!compact && <p className="text-xs text-slate">One email a week. Unsubscribe anytime.</p>}
-    </form>
-  )
+/* Cards */
+.card {
+  border: 1px solid var(--color-line);
+  border-radius: 20px;
+  background: #fff;
+}
+
+/* Job description text (16px, 1.7 line height, 8-point spacing) */
+.job-body {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--color-slate);
+  overflow-wrap: anywhere;
+}
+.job-body > :first-child {
+  margin-top: 0;
+}
+.job-body p {
+  margin: 0 0 16px;
+}
+.job-body ul,
+.job-body ol {
+  margin: 0 0 24px;
+  padding-left: 22px;
+}
+.job-body ul {
+  list-style: disc;
+}
+.job-body ol {
+  list-style: decimal;
+}
+.job-body li {
+  margin-bottom: 8px;
+  padding-left: 4px;
+}
+.job-body h1,
+.job-body h2,
+.job-body h3,
+.job-body h4 {
+  margin: 40px 0 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+.job-body strong,
+.job-body b {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.job-body a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Soft fade-in when a page or section appears */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.5s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Mobile filter sheet slides up (used by the filter panel) */
+.sheet-up {
+  animation: sheet-up 0.28s ease-out;
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
 }
