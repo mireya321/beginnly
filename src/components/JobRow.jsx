@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Banknote, BadgeCheck, CircleHelp, GraduationCap, MapPin } from 'lucide-react'
+import { Banknote, BadgeCheck, Building2, CircleHelp, GraduationCap, Laptop, MapPin } from 'lucide-react'
 import { formatPay, categoryLabel, levelLabel } from '../lib/format'
 import { ago, daysOld, experienceNote, fieldOf, isEntry, isSpecificNote, NOT_LISTED } from '../lib/ui'
 import Arrow from './Arrow'
@@ -9,9 +9,16 @@ export default function JobRow({ job }) {
   const pay = formatPay(job)
   const age = daysOld(job.date_posted)
   const isNew = (age ?? 99) <= 3
-  const remote = /remote/i.test(job.location || '')
   const note = experienceNote(job, levelLabel)
   const entry = isEntry(job)
+
+  // Work type: use the saved value; for older jobs fall back to the location text
+  const workType =
+    job.work_type && job.work_type !== 'Not listed'
+      ? job.work_type
+      : /remote/i.test(job.location || '')
+        ? 'Remote'
+        : ''
 
   const chip =
     'inline-flex items-center gap-1.5 rounded-full bg-paper-2 px-3 py-1.5 text-xs font-bold text-ink'
@@ -70,10 +77,14 @@ export default function JobRow({ job }) {
               {NOT_LISTED}
             </span>
           )}
-          {remote && (
+          {workType && (
             <span className={chip}>
-              <BadgeCheck size={14} className="text-primary" />
-              Remote
+              {workType === 'Remote' ? (
+                <Laptop size={14} className="text-primary" />
+              ) : (
+                <Building2 size={14} className="text-primary" />
+              )}
+              {workType}
             </span>
           )}
         </div>

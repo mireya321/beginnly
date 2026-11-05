@@ -10,19 +10,26 @@ export const DEFAULT_FILTERS = {
   levels: [],
   categories: [],
   fields: [],
+  workTypes: [],
+  state: '',
+  usOnly: false,
+  location: '',
+  minPay: 0,
+  payListedOnly: false,
   includeOlder: false,
   includeNoDate: false,
   includeNoLevel: false,
 }
 
 const CARD_COLUMNS =
-  'id, title, company, location, salary_text, salary_min, salary_max, url, source, category, field, experience_level, date_posted'
+  'id, title, company, location, salary_text, salary_min, salary_max, url, source, category, field, work_type, state, country, annual_min, experience_level, date_posted'
 
 function sinceDate() {
   return new Date(Date.now() - MAX_AGE_DAYS * 86400000).toISOString()
 }
 
 const quote = (v) => `"${v}"`
+const cleanText = (v) => String(v || '').trim().replace(/[%,()"]/g, ' ')
 
 function applyFilters(q, f) {
   const since = sinceDate()
@@ -56,6 +63,24 @@ function applyFilters(q, f) {
     q = q.in('field', f.fields)
   }
 
+  // Remote / hybrid / onsite
+  if (f.workTypes && f.workTypes.length) {
+    q = q.in('work_type', f.workTypes)
+  }
+
+  // Location: US only, a state, or words in the location text
+  if (f.usOnly) q = q.eq('country', 'US')
+  if (f.state) q = q.eq('state', f.state)
+  const place = cleanText(f.location)
+  if (place) q = q.ilike('location', `%${place}%`)
+
+  // Pay (yearly). Jobs with no pay listed are hidden when either is used.
+  if (f.minPay > 0) {
+    q = q.gte('annual_min', f.minPay)
+  } else if (f.payListedOnly) {
+    q = q.not('annual_min', 'is', null)
+  }
+
   // Category
   if (f.categories.length) {
     q = q.in('category', f.categories)
@@ -64,7 +89,7 @@ function applyFilters(q, f) {
   }
 
   // Search
-  const term = (f.search || '').trim().replace(/[%,()"]/g, ' ')
+  const term = cleanText(f.search)
   if (term) q = q.or(`title.ilike.%${term}%,company.ilike.%${term}%`)
 
   return q
@@ -74,7 +99,7 @@ export async function fetchJobs({ sort, page, pageSize, ...filters }) {
   let q = supabase
     .from(JOBS_TABLE)
     .select(CARD_COLUMNS, { count: 'estimated' })
-  q = applyFilters(q, filters)
+  q = applyFilters(q, { ...DEFAULT_FILTERS, ...filters })
   if (sort !== 'oldest' && sort !== 'pay') q = q.order('featured', { ascending: false })
   if (sort === 'oldest') {
     q = q.order('date_posted', { ascending: true, nullsFirst: false })
