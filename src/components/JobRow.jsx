@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
-import { Banknote, BadgeCheck, GraduationCap, MapPin } from 'lucide-react'
+import { Banknote, BadgeCheck, CircleHelp, GraduationCap, MapPin } from 'lucide-react'
 import { formatPay, categoryLabel, levelLabel } from '../lib/format'
-import { ago, daysOld, experienceNote } from '../lib/ui'
+import { ago, daysOld, experienceNote, fieldOf, isEntry, isSpecificNote, NOT_LISTED } from '../lib/ui'
 import Arrow from './Arrow'
 
 // A text-only job card (no image). The whole card opens the job page.
@@ -11,6 +11,7 @@ export default function JobRow({ job }) {
   const isNew = (age ?? 99) <= 3
   const remote = /remote/i.test(job.location || '')
   const note = experienceNote(job, levelLabel)
+  const entry = isEntry(job)
 
   const chip =
     'inline-flex items-center gap-1.5 rounded-full bg-paper-2 px-3 py-1.5 text-xs font-bold text-ink'
@@ -23,7 +24,7 @@ export default function JobRow({ job }) {
       <div>
         <div className="mb-4 flex items-start justify-between gap-3">
           <span className="rounded-full bg-primary/10 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-primary">
-            {categoryLabel(job.category)}
+            {fieldOf(job, categoryLabel(job.category))}
           </span>
           {isNew && (
             <span className="rounded-full bg-highlight px-3 py-1 text-xs font-extrabold text-ink">
@@ -49,17 +50,26 @@ export default function JobRow({ job }) {
               <span>{pay}</span>
             </span>
           )}
-          <span className="flex items-center gap-1.5">
-            <GraduationCap size={16} />
-            <span>{note}</span>
-          </span>
+          {isSpecificNote(note) && (
+            <span className="flex items-center gap-1.5">
+              <GraduationCap size={16} />
+              <span>{note}</span>
+            </span>
+          )}
         </div>
 
         <div className="mb-6 flex flex-wrap gap-2">
-          <span className={chip}>
-            <BadgeCheck size={14} className="text-primary" />
-            Entry level
-          </span>
+          {entry ? (
+            <span className={chip}>
+              <BadgeCheck size={14} className="text-primary" />
+              Entry level
+            </span>
+          ) : (
+            <span className={chip}>
+              <CircleHelp size={14} className="text-slate" />
+              {NOT_LISTED}
+            </span>
+          )}
           {remote && (
             <span className={chip}>
               <BadgeCheck size={14} className="text-primary" />

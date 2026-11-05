@@ -9,10 +9,14 @@ import {
 export const DEFAULT_FILTERS = {
   levels: [],
   categories: [],
+  fields: [],
   includeOlder: false,
   includeNoDate: false,
   includeNoLevel: false,
 }
+
+const CARD_COLUMNS =
+  'id, title, company, location, salary_text, salary_min, salary_max, url, source, category, field, experience_level, date_posted'
 
 function sinceDate() {
   return new Date(Date.now() - MAX_AGE_DAYS * 86400000).toISOString()
@@ -47,6 +51,11 @@ function applyFilters(q, f) {
     q = q.not('experience_level', 'is', null)
   }
 
+  // Job field
+  if (f.fields && f.fields.length) {
+    q = q.in('field', f.fields)
+  }
+
   // Category
   if (f.categories.length) {
     q = q.in('category', f.categories)
@@ -64,12 +73,9 @@ function applyFilters(q, f) {
 export async function fetchJobs({ sort, page, pageSize, ...filters }) {
   let q = supabase
     .from(JOBS_TABLE)
-    .select(
-      'id, title, company, location, salary_text, salary_min, salary_max, url, source, category, experience_level, date_posted',
-            { count: 'estimated' }
-    )
+    .select(CARD_COLUMNS, { count: 'estimated' })
   q = applyFilters(q, filters)
- if (sort !== 'oldest' && sort !== 'pay') q = q.order('featured', { ascending: false })
+  if (sort !== 'oldest' && sort !== 'pay') q = q.order('featured', { ascending: false })
   if (sort === 'oldest') {
     q = q.order('date_posted', { ascending: true, nullsFirst: false })
   } else if (sort === 'pay') {
@@ -84,7 +90,7 @@ export async function fetchJobs({ sort, page, pageSize, ...filters }) {
 
   const { data, error, count } = await q
   if (error) throw error
-   return {
+  return {
     jobs: data ?? [],
     total: count ?? 0,
     hasMore: (data?.length ?? 0) === pageSize,
@@ -94,12 +100,13 @@ export async function fetchJobs({ sort, page, pageSize, ...filters }) {
 export async function fetchLiveCount() {
   let q = supabase
     .from(JOBS_TABLE)
-       .select('id', { count: 'estimated', head: true })
+    .select('id', { count: 'estimated', head: true })
   q = applyFilters(q, DEFAULT_FILTERS)
   const { count, error } = await q
   if (error) throw error
   return count ?? 0
 }
+
 export async function fetchJob(id) {
   const { data, error } = await supabase
     .from(JOBS_TABLE)
@@ -110,18 +117,17 @@ export async function fetchJob(id) {
   return data
 }
 
+// More jobs from the same field (or the same category, for older jobs without a field)
 export async function fetchSimilar(job, limit = 3) {
-  if (!job.category) return []
+  if (!job.field && !job.category) return []
   let q = supabase
     .from(JOBS_TABLE)
-    .select(
-      'id, title, company, location, salary_text, salary_min, salary_max, url, source, category, experience_level, date_posted'
-    )
+    .select(CARD_COLUMNS)
     .eq('is_active', true)
-    .eq('category', job.category)
     .neq('id', job.id)
     .gte('date_posted', sinceDate())
     .not('experience_level', 'is', null)
+  q = job.field ? q.eq('field', job.field) : q.eq('category', job.category)
   if (job.experience_level) q = q.eq('experience_level', job.experience_level)
   const { data, error } = await q
     .order('date_posted', { ascending: false })

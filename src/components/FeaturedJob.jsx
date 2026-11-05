@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowUpRight, GraduationCap, MapPin } from 'lucide-react'
 import { formatPay, categoryLabel, levelLabel } from '../lib/format'
-import { experienceNote } from '../lib/ui'
+import { experienceNote, fieldOf } from '../lib/ui'
 
 // Placeholder photo (Unsplash, free to use). To change it, replace this link
 // with another photo link, or save your own photo as public/featured.jpg and
@@ -35,7 +35,7 @@ export default function FeaturedJob({ job }) {
           {job.company}
         </span>
         <span className="absolute right-4 top-4 rounded-full bg-highlight px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-ink">
-          {categoryLabel(job.category)}
+          {fieldOf(job, categoryLabel(job.category))}
         </span>
       </div>
 

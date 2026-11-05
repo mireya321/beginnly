@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Search, SlidersHorizontal, X } from 'lucide-react'
 import Layout from '../components/Layout'
 import JobRow from '../components/JobRow'
@@ -8,20 +8,15 @@ import SubscribeForm from '../components/SubscribeForm'
 import SubscribeSection from '../components/SubscribeSection'
 import FeaturedJob from '../components/FeaturedJob'
 import Arrow from '../components/Arrow'
-import { PAGE_SIZE, SITE_NAME } from '../config'
+import { PAGE_SIZE, SITE_NAME, FIELDS } from '../config'
 import { fetchJobs, DEFAULT_FILTERS } from '../lib/jobs'
 
-// The board opens on entry-level jobs only
-const START_FILTERS = { ...DEFAULT_FILTERS, levels: ['Entry-level'] }
+// The board opens on entry-level jobs and jobs that don't list years of experience
+const BOTH = ['Entry-level', 'Years not listed']
+const START_FILTERS = { ...DEFAULT_FILTERS, levels: BOTH }
 
-const PILLS = [
-  ['All roles', ''],
-  ['Customer support', 'Customer support'],
-  ['Admin', 'Admin'],
-  ['Accounting', 'Accounting'],
-  ['Sales', 'Sales'],
-  ['Teaching', 'Teaching'],
-]
+// Pills at the top: one per job field ("Other" is left out)
+const PILLS = FIELDS.filter((f) => f !== 'Other')
 
 export default function Jobs() {
   const [params] = useSearchParams()
@@ -118,19 +113,32 @@ export default function Jobs() {
         {/* Filter chips and search */}
         <div className="mb-4 flex flex-col items-stretch justify-between gap-4 lg:flex-row lg:items-center">
           <div className="flex items-center gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {PILLS.map(([label, value]) => (
-              <button
-                key={label}
-                onClick={() => setSearchInput(value)}
-                className={`whitespace-nowrap rounded-full border px-5 py-2.5 text-sm transition ${
-                  searchInput === value
-                    ? 'border-forest bg-forest font-bold text-white'
-                    : 'border-line bg-white font-semibold text-ink hover:border-ink'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
+            <button
+              onClick={() => changeFilters({ fields: [] })}
+              className={`whitespace-nowrap rounded-full border px-5 py-2.5 text-sm transition ${
+                filters.fields.length === 0
+                  ? 'border-forest bg-forest font-bold text-white'
+                  : 'border-line bg-white font-semibold text-ink hover:border-ink'
+              }`}
+            >
+              All roles
+            </button>
+            {PILLS.map((label) => {
+              const active = filters.fields.includes(label)
+              return (
+                <button
+                  key={label}
+                  onClick={() => changeFilters({ fields: active ? [] : [label] })}
+                  className={`whitespace-nowrap rounded-full border px-5 py-2.5 text-sm transition ${
+                    active
+                      ? 'border-forest bg-forest font-bold text-white'
+                      : 'border-line bg-white font-semibold text-ink hover:border-ink'
+                  }`}
+                >
+                  {label}
+                </button>
+              )
+            })}
           </div>
 
           <div className="relative w-full lg:w-72">
@@ -155,6 +163,17 @@ export default function Jobs() {
         </div>
 
         <div className="mb-10 flex flex-wrap items-center justify-end gap-5 text-sm">
+          <label className="flex cursor-pointer items-center gap-2 font-bold text-ink">
+            <input
+              type="checkbox"
+              checked={filters.levels.length === 1 && filters.levels[0] === 'Entry-level'}
+              onChange={(e) =>
+                changeFilters({ levels: e.target.checked ? ['Entry-level'] : BOTH })
+              }
+              className="h-4 w-4 cursor-pointer accent-[#1D5641]"
+            />
+            Entry level only
+          </label>
           <label className="flex items-center gap-2">
             <span className="text-slate">Sort</span>
             <select
@@ -214,17 +233,18 @@ export default function Jobs() {
           </div>
         )}
 
-        {/* Job cards */}
-                {/* Note about accuracy */}
-        <p className="mb-6 rounded-2xl bg-paper-2 px-5 py-3 text-sm leading-relaxed text-slate">
-          <span className="font-bold text-ink">Heads up:</span> we're still tightening which jobs
-          show up here, so a few listings that ask for experience may slip through. Spotted one?{' '}
-          <a href="/contact" className="font-semibold text-primary underline underline-offset-2">
+        {/* Heads-up note */}
+        <p className="mb-6 text-xs leading-relaxed text-slate">
+          Heads up: we're still tightening which jobs show up here, so a few listings that ask
+          for experience may slip through. Spotted one?{' '}
+          <Link to="/contact" className="font-bold text-primary underline underline-offset-4">
             Let us know
-          </a>
+          </Link>
           .
         </p>
-      {error && (
+
+        {/* Job cards */}
+        {error && (
           <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
             Could not load jobs: {error}
           </div>

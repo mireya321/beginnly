@@ -13,12 +13,35 @@ export const PAGE_SIZE = 20
 // label = what visitors see
 // values = the exact text stored in your database (empty = no jobs yet, hidden from the filter)
 export const EXPERIENCE_LEVELS = [
-  { label: 'Entry-level', hint: 'No experience at all', values: ['Truly Entry Level'] },
+  { label: 'Entry-level', hint: 'Posting says entry level', values: ['Truly Entry Level'] },
+  { label: 'Years not listed', hint: 'No years of experience listed', values: ['Years not listed'] },
   { label: 'Starter', hint: 'Up to 1 year', values: [] },
   { label: 'Early career', hint: '1-3 years', values: ['Some Experience (1-3 yrs)'] },
   { label: 'Mid-level', hint: '3-5 years', values: ['Mid Level (3-5 yrs)'] },
   { label: 'Senior', hint: '5-10 years', values: ['Senior (5+ yrs)'] },
   { label: 'Expert', hint: '10+ years', values: [] },
+]
+
+// The job fields shown on cards and used for the pills at the top of the board.
+// Must match the text stored in the "field" column.
+export const FIELDS = [
+  'Customer support & retail',
+  'Admin & office',
+  'Sales',
+  'Accounting & finance',
+  'Legal & compliance',
+  'Data & analytics',
+  'Software & IT',
+  'Cybersecurity',
+  'Healthcare',
+  'Marketing & content',
+  'Design',
+  'HR & recruiting',
+  'Teaching & education',
+  'Operations & strategy',
+  'Trades & manufacturing',
+  'Engineering & science',
+  'Other',
 ]
 
 // value = text in your database, label = what visitors see
