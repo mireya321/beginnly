@@ -15,13 +15,13 @@ export const PAGE_SIZE = 20
 export const EXPERIENCE_LEVELS = [
   { label: 'Entry-level', hint: 'Posting says entry level', values: ['Truly Entry Level'] },
   { label: 'Years not listed', hint: 'No years of experience listed', values: ['Years not listed'] },
-  { label: 'Starter', hint: 'Up to 1 year', values: [] },
-  { label: 'Early career', hint: '1-3 years', values: ['Some Experience (1-3 yrs)'] },
-  { label: 'Mid-level', hint: '3-5 years', values: ['Mid Level (3-5 yrs)'] },
-  { label: 'Senior', hint: '5-10 years', values: ['Senior (5+ yrs)'] },
-  { label: 'Expert', hint: '10+ years', values: [] },
+  // Kept so old job pages can still show a label, but hidden from the filter
+  { label: 'Starter', hint: 'Up to 1 year', values: [], inFilter: false },
+  { label: 'Early career', hint: '1-3 years', values: ['Some Experience (1-3 yrs)'], inFilter: false },
+  { label: 'Mid-level', hint: '3-5 years', values: ['Mid Level (3-5 yrs)'], inFilter: false },
+  { label: 'Senior', hint: '5-10 years', values: ['Senior (5+ yrs)'], inFilter: false },
+  { label: 'Expert', hint: '10+ years', values: [], inFilter: false },
 ]
-
 // The job fields shown on cards and used for the pills at the top of the board.
 // Must match the text stored in the "field" column.
 export const FIELDS = [

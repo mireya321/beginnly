@@ -82,7 +82,7 @@ export default function FilterPanel({ filters, onChange, defaults = DEFAULT_FILT
     })
   }
 
-  const levels = EXPERIENCE_LEVELS.filter((l) => l.values.length > 0)
+  const levels = EXPERIENCE_LEVELS.filter((l) => l.values.length > 0 && l.inFilter !== false)
   const isDefault = JSON.stringify(filters) === JSON.stringify(defaults)
 
   return (
