@@ -9,6 +9,7 @@ import {
 } from 'react-router-dom'
 import Jobs from './pages/Jobs'
 import JobPage from './pages/JobPage'
+import Resources from './pages/Resources'
 import Contact from './pages/Contact'
 import Privacy from './pages/Privacy'
 import Unsubscribe from './pages/Unsubscribe'
@@ -42,6 +43,7 @@ function AppRoutes() {
         <Route path="/" element={<Navigate to="/jobs" replace />} />
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/jobs/:id" element={<JobPage />} />
+        <Route path="/resources" element={<Resources />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/unsubscribe" element={<Unsubscribe />} />

@@ -30,6 +30,9 @@ export default function Navbar() {
           <NavLink to="/jobs" end className={({ isActive }) => pill(isActive)}>
             Jobs
           </NavLink>
+          <NavLink to="/resources" className={({ isActive }) => pill(isActive)}>
+            Resources
+          </NavLink>
           <NavLink to="/contact" className={({ isActive }) => pill(isActive)}>
             Contact us
           </NavLink>
@@ -66,6 +69,13 @@ export default function Navbar() {
               className="block rounded-xl bg-highlight px-4 py-3 font-bold"
             >
               Jobs
+            </Link>
+            <Link
+              to="/resources"
+              onClick={() => setOpen(false)}
+              className="block rounded-xl bg-paper-2 px-4 py-3 font-semibold"
+            >
+              Resources
             </Link>
             <Link
               to="/contact"
