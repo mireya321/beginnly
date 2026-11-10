@@ -3,6 +3,7 @@ import { ArrowUpRight, Search, Tag, X } from 'lucide-react'
 import Layout from '../components/Layout'
 import SubscribeSection from '../components/SubscribeSection'
 import { SITE_NAME, FIELDS } from '../config'
+import { setSeo } from '../lib/seo'
 import { TOOLS } from '../lib/tools'
 import { trackToolClick } from '../lib/track'
 
@@ -100,7 +101,12 @@ export default function Resources() {
   const [query, setQuery] = useState('')
 
   useEffect(() => {
-    document.title = `${SITE_NAME} | Free resources to build job skills`
+    setSeo({
+      title: 'Free resources to build job skills | Beginnly',
+      description:
+        'Free courses and tools to learn the skills for your next job, from customer support and sales to data, software and healthcare.',
+      path: '/resources',
+    })
   }, [])
 
   // Only resources that are switched on and have a link

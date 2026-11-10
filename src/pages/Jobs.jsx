@@ -9,6 +9,7 @@ import SubscribeSection from '../components/SubscribeSection'
 import FeaturedJob from '../components/FeaturedJob'
 import Arrow from '../components/Arrow'
 import { PAGE_SIZE, SITE_NAME, FIELDS } from '../config'
+import { setSeo } from '../lib/seo'
 import { fetchJobs, DEFAULT_FILTERS } from '../lib/jobs'
 
 // The board opens on entry-level jobs and jobs that don't list years of experience
@@ -34,7 +35,12 @@ export default function Jobs() {
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   useEffect(() => {
-    document.title = `${SITE_NAME} | Entry-level jobs that don't ask for experience`
+    setSeo({
+      title: 'Entry-level jobs & no-experience jobs | Beginnly',
+      description:
+        "Browse jobs that don't ask for years of experience. Filter by field, remote, hybrid or on-site, location and pay. Updated daily.",
+      path: '/jobs',
+    })
   }, [])
 
   // Wait a moment after typing before searching

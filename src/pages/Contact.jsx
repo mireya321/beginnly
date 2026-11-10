@@ -2,13 +2,19 @@ import { useEffect } from 'react'
 import { Mail } from 'lucide-react'
 import Layout from '../components/Layout'
 import { SITE_NAME } from '../config'
+import { setSeo } from '../lib/seo'
 
 // Type your contact email between the quotes below, then save.
 const CONTACT_EMAIL = 'support@beginnly.com'
 
 export default function Contact() {
   useEffect(() => {
-    document.title = `Contact us | ${SITE_NAME}`
+    setSeo({
+      title: 'Contact us | Beginnly',
+      description:
+        'Questions, feedback, or a job we should look at? Get in touch with the Beginnly team.',
+      path: '/contact',
+    })
   }, [])
 
   return (
