@@ -12,9 +12,9 @@ import { PAGE_SIZE, SITE_NAME, FIELDS } from '../config'
 import { setSeo } from '../lib/seo'
 import { fetchJobs, DEFAULT_FILTERS } from '../lib/jobs'
 
-// The board opens on entry-level jobs and jobs that don't list years of experience
-const BOTH = ['Entry-level', 'Years not listed']
-const START_FILTERS = { ...DEFAULT_FILTERS, levels: BOTH }
+// The board opens on every level. "Beginner-friendly" = entry level + years not listed.
+const BEGINNER = ['Entry-level', 'Years not listed']
+const START_FILTERS = { ...DEFAULT_FILTERS, levels: [] }
 
 // Pills at the top: one per job field ("Other" is left out)
 const PILLS = FIELDS.filter((f) => f !== 'Other')
@@ -36,9 +36,9 @@ export default function Jobs() {
 
   useEffect(() => {
     setSeo({
-      title: 'Entry-level jobs & no-experience jobs | Beginnly',
+      title: 'Entry-level to senior jobs, labeled by experience | Beginnly',
       description:
-        "Browse jobs that don't ask for years of experience. Filter by field, remote, hybrid or on-site, location and pay. Updated daily.",
+        'Browse jobs at every level from employer hiring pages and USAJOBS, each labeled with the experience it asks for. Filter by field, remote, location and pay.',
       path: '/jobs',
     })
   }, [])
@@ -88,6 +88,10 @@ export default function Jobs() {
   const dirty =
     search !== '' || JSON.stringify(filters) !== JSON.stringify(START_FILTERS)
 
+  const beginnerOnly =
+    filters.levels.length === BEGINNER.length &&
+    BEGINNER.every((l) => filters.levels.includes(l))
+
   const showFeatured = !dirty && page === 0 && jobs.length > 0
   const gridJobs = showFeatured ? jobs.slice(1) : jobs
 
@@ -102,15 +106,16 @@ export default function Jobs() {
           <div className="grid grid-cols-1 items-end gap-6 lg:grid-cols-12">
             <div className="lg:col-span-7">
               <h1 className="t-display rise">
-                Entry-level jobs <br className="hidden sm:block" />
-                that don't ask for <span className="mark inline-block px-3">experience.</span>
+                Jobs, labeled by the <br className="hidden sm:block" />
+                <span className="mark inline-block px-3">experience</span> they ask for.
               </h1>
             </div>
             <div className="lg:col-span-5">
               <p className="text-sm leading-relaxed text-slate sm:text-base">
-                Every job here is left out if it requires years of professional experience.
-                Degrees, coursework and projects are fine. Don't see your role yet? Get new jobs
-                in your inbox each week.
+                Listings come from employer hiring pages and USAJOBS. Each one shows the
+                experience it asks for, so you can start with beginner-friendly jobs or
+                browse every level. Don't see your role yet? Get new jobs in your inbox each
+                week.
               </p>
             </div>
           </div>
@@ -172,13 +177,11 @@ export default function Jobs() {
           <label className="flex cursor-pointer items-center gap-2 font-bold text-ink">
             <input
               type="checkbox"
-              checked={filters.levels.length === 1 && filters.levels[0] === 'Entry-level'}
-              onChange={(e) =>
-                changeFilters({ levels: e.target.checked ? ['Entry-level'] : BOTH })
-              }
+              checked={beginnerOnly}
+              onChange={(e) => changeFilters({ levels: e.target.checked ? BEGINNER : [] })}
               className="h-4 w-4 cursor-pointer accent-[#1D5641]"
             />
-            Entry level only
+            Beginner-friendly only
           </label>
           <label className="flex items-center gap-2">
             <span className="text-slate">Sort</span>
@@ -231,7 +234,7 @@ export default function Jobs() {
                   Get new jobs every week.
                 </h3>
                 <p className="mb-6 text-xs font-medium leading-relaxed text-slate sm:text-sm">
-                  Add your email. We'll send you new entry-level jobs once a week.
+                  Add your email. We'll send you new jobs once a week.
                 </p>
               </div>
               <SubscribeForm compact />
@@ -239,12 +242,12 @@ export default function Jobs() {
           </div>
         )}
 
-        {/* Heads-up note */}
+        {/* Labels note */}
         <p className="mb-6 text-xs leading-relaxed text-slate">
-          Heads up: we're still tightening which jobs show up here, so a few listings that ask
-          for experience may slip through. Spotted one?{' '}
+          Experience labels come from each posting's own words, and from the job title for
+          senior and manager roles. If one looks wrong, let us know.{' '}
           <Link to="/contact" className="font-bold text-primary underline underline-offset-4">
-            Let us know
+            Tell us
           </Link>
           .
         </p>
@@ -294,8 +297,8 @@ export default function Jobs() {
               Don't see your role yet?
             </h2>
             <p className="text-xs leading-relaxed text-white/75 sm:text-sm">
-              Add your email once. We'll send you new entry-level jobs every week, so you don't
-              have to keep checking.
+              Add your email once. We'll send you new jobs every week, so you don't have to
+              keep checking.
             </p>
           </div>
           <a href="#alerts" className="btn btn-lime shrink-0">
