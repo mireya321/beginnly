@@ -4,16 +4,16 @@ import { trackToolClick } from '../lib/track'
 
 const LABEL = { sponsored: 'Sponsored', paid: 'Paid link' }
 
-// "Tools to help build the skills this role has"
+// "Free resources for this role"
 // Shows nothing when no tools match the job.
 export default function ToolsBlock({ job }) {
   const tools = toolsForJob(job)
   if (!tools.length) return null
 
   return (
-    <section className="card p-6" aria-label="Tools to help build the skills this role has">
+    <section className="card p-6" aria-label="Free resources for this role">
       <h3 className="font-display text-xl font-extrabold leading-tight text-ink">
-        Tools to help build the skills this role has
+        Free resources for this role
       </h3>
       <ul className="mt-4 divide-y divide-line">
         {tools.map((t) => {
