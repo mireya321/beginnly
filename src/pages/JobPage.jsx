@@ -275,7 +275,7 @@ export default function JobPage() {
         <section className="wrap py-16">
           <div className="mb-8 flex items-center justify-between gap-4">
             <h2 className="font-display text-3xl font-extrabold text-ink sm:text-4xl">
-              More entry-level jobs
+              More jobs like this
             </h2>
             <Link
               to="/jobs"
